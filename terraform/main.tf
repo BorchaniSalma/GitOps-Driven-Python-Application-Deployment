@@ -35,7 +35,7 @@ resource "kubernetes_deployment" "flask_app" {
           image = "salmaborchani/flask-app:latest"
           name  = "flask-container"
 
-          ports {
+          port {
             container_port = 5000
           }
         }
