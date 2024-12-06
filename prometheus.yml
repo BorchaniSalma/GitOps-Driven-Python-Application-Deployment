@@ -1,15 +1,15 @@
+global:
+  scrape_interval: 15s
+
 scrape_configs:
   - job_name: "flask-app"
-    scrape_interval: 15s
     static_configs:
       - targets: ["flask-app:5000"]
+
 alerting:
-  alert_rules:
-    - alert: HighMemoryUsage
-      expr: process_resident_memory_bytes > 50000000
-      for: 5m
-      labels:
-        severity: critical
-      annotations:
-        summary: "High Memory Usage"
-        description: "The memory usage is above 50MB for 5 minutes."
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - "alert_rules.yml"

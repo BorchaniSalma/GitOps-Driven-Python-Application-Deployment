@@ -21,22 +21,31 @@ successful_changes = Counter(
     'successful_changes', 'Number of successful changes'
 )
 
+# New custom metric for health checks
+endpoint_status = Gauge(
+    'endpoint_status', 'Health of specific endpoints', ['endpoint'])
+
 # Example variables for tracking recovery and lead time
 start_time = None  # Start time for lead time calculation
 recovery_start_time = None  # Start time for recovery calculation
 
 
-# @app.route("/")
-# def index():
-#     # Render the HTML frontend
-#     return render_template("index.html")
-
-
 @app.route("/")
 def index():
-    # Introduce a bug to simulate a faulty deployment
-    raise Exception("Intentional Error: Application Crashed!")
-    return "This text will never be displayed due to the crash."
+    # Render the HTML frontend
+    return render_template("index.html")
+
+
+# @app.route("/")
+# def index():
+#     # Introduce a bug to simulate a faulty deployment
+#     try:
+#         raise Exception("Intentional Error: Application Crashed!")
+#         endpoint_status.labels(endpoint='/').set(1)  # Healthy
+#         return "This text will never be displayed due to the crash."
+#     except Exception as e:
+#         endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
+#         return str(e), 500
 
 
 @app.route("/deploy")

@@ -1,0 +1,11 @@
+groups:
+  - name: app-alerts
+    rules:
+      - alert: ApplicationEndpointDown
+        expr: endpoint_status{endpoint="/"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flask Application Endpoint Down"
+          description: "The / endpoint of the Flask application is unhealthy for 1 minute."
