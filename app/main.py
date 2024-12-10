@@ -21,31 +21,21 @@ successful_changes = Counter(
     'successful_changes', 'Number of successful changes'
 )
 
-# New custom metric for health checks
+# Custom metric for endpoint health checks
 endpoint_status = Gauge(
     'endpoint_status', 'Health of specific endpoints', ['endpoint'])
 
-# Example variables for tracking recovery and lead time
+# Variables for tracking recovery and lead time
 start_time = None  # Start time for lead time calculation
-recovery_start_time = None  # Start time for recovery calculation
+failure_time = None  # Time of last failure for MTTR calculation
 
 
 @app.route("/")
 def index():
-    # Render the HTML frontend
+    """Main index route."""
+    # Mark the endpoint as healthy
+    endpoint_status.labels(endpoint='/').set(1)  # Healthy
     return render_template("index.html")
-
-
-# @app.route("/")
-# def index():
-#     # Introduce a bug to simulate a faulty deployment
-#     try:
-#         raise Exception("Intentional Error: Application Crashed!")
-#         endpoint_status.labels(endpoint='/').set(1)  # Healthy
-#         return "This text will never be displayed due to the crash."
-#     except Exception as e:
-#         endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
-#         return str(e), 500
 
 
 @app.route("/deploy")
@@ -53,9 +43,12 @@ def deploy():
     """Simulate a successful deployment and calculate lead time."""
     global start_time
     if start_time is not None:
+        # Calculate lead time for changes
         lead_time = time.time() - start_time
         lead_time_for_changes.observe(lead_time)
+    # Increment deployment frequency
     deployment_frequency.inc()
+    # Update start time for the next deployment
     start_time = time.time()
     return "Deployment successful!", 200
 
@@ -63,6 +56,12 @@ def deploy():
 @app.route("/failure")
 def failure():
     """Simulate a failed change."""
+    global failure_time
+    # Mark the endpoint as unhealthy
+    endpoint_status.labels(endpoint='/failure').set(0)  # Unhealthy
+    # Record the failure time for MTTR calculation
+    failure_time = time.time()
+    # Increment the failure rate counter
     change_failure_rate.inc()
     return "Change failed!", 500
 
@@ -70,11 +69,15 @@ def failure():
 @app.route("/recover")
 def recover():
     """Simulate recovery and calculate MTTR."""
-    global recovery_start_time
-    if recovery_start_time is not None:
-        recovery_time = time.time() - recovery_start_time
+    global failure_time
+    if failure_time is not None:
+        # Calculate mean time to recovery
+        recovery_time = time.time() - failure_time
         mean_time_to_recovery.set(recovery_time)
-    recovery_start_time = time.time()
+        # Reset failure time after recovery
+        failure_time = None
+    # Mark the endpoint as healthy
+    endpoint_status.labels(endpoint='/failure').set(1)  # Healthy
     return "System recovered!", 200
 
 
