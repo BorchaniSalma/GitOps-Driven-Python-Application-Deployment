@@ -8,11 +8,11 @@ spec:
   source:
     repoURL: 'https://github.com/BorchaniSalma/GitOps-Driven-Python-Application-Deployment'
     targetRevision: main
-    path: '.'
+    path: '.'  # Path in the repo where the manifest is stored
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: gitops-namespace
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      prune: true  # Deletes resources no longer defined in Git
+      selfHeal: true  # Fixes drift from the Git state

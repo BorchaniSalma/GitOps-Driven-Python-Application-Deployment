@@ -32,8 +32,9 @@ resource "kubernetes_deployment" "flask_app" {
 
       spec {
         container {
-          image = "salmaborchani/flask-app:latest"
+          image = "salmaborchani/flask-app:latest"  # Use unique tag instead of 'latest' in production
           name  = "flask-container"
+          image_pull_policy = "Always"  # Ensure Kubernetes always pulls the latest image
 
           port {
             container_port = 5000
