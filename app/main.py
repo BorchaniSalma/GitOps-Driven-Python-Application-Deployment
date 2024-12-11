@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import time
+import random
 from prometheus_client import Counter, Summary, Gauge, generate_latest
 
 app = Flask(__name__)
@@ -28,13 +29,28 @@ endpoint_status = Gauge(
 # Variables for tracking recovery and lead time
 start_time = None  # Start time for lead time calculation
 failure_time = None  # Time of last failure for MTTR calculation
+is_healthy = True  # Flag to simulate the endpoint's health
 
 
 @app.route("/")
 def index():
-    """Main index route."""
-    # Mark the endpoint as healthy
-    endpoint_status.labels(endpoint='/').set(1)  # Healthy
+    """Main index route with simulated failure."""
+    global is_healthy, failure_time
+
+    # Simulate a failure randomly (e.g., 1 in 5 requests fail)
+    if random.randint(1, 5) == 1:
+        # Mark the endpoint as unhealthy
+        is_healthy = False
+        endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
+        change_failure_rate.inc()
+        failure_time = time.time() if failure_time is None else failure_time
+        return "Simulated failure occurred!", 500
+
+    # If healthy, mark the endpoint as healthy
+    if is_healthy:
+        endpoint_status.labels(endpoint='/').set(1)  # Healthy
+
+    # Render the frontend
     return render_template("index.html")
 
 
@@ -53,23 +69,10 @@ def deploy():
     return "Deployment successful!", 200
 
 
-@app.route("/failure")
-def failure():
-    """Simulate a failed change."""
-    global failure_time
-    # Mark the endpoint as unhealthy
-    endpoint_status.labels(endpoint='/failure').set(0)  # Unhealthy
-    # Record the failure time for MTTR calculation
-    failure_time = time.time()
-    # Increment the failure rate counter
-    change_failure_rate.inc()
-    return "Change failed!", 500
-
-
 @app.route("/recover")
 def recover():
     """Simulate recovery and calculate MTTR."""
-    global failure_time
+    global failure_time, is_healthy
     if failure_time is not None:
         # Calculate mean time to recovery
         recovery_time = time.time() - failure_time
@@ -77,7 +80,8 @@ def recover():
         # Reset failure time after recovery
         failure_time = None
     # Mark the endpoint as healthy
-    endpoint_status.labels(endpoint='/failure').set(1)  # Healthy
+    is_healthy = True
+    endpoint_status.labels(endpoint='/').set(1)  # Healthy
     return "System recovered!", 200
 
 
