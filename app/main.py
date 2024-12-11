@@ -34,24 +34,8 @@ is_healthy = True  # Flag to simulate the endpoint's health
 
 @app.route("/")
 def index():
-    # """Main index route with simulated failure."""
-    # global is_healthy, failure_time
-
-    # # Simulate a failure randomly (e.g., 1 in 5 requests fail)
-    # if random.randint(1, 5) == 1:
-    #     # Mark the endpoint as unhealthy
-    #     is_healthy = False
-    #     endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
-    #     change_failure_rate.inc()
-    #     failure_time = time.time() if failure_time is None else failure_time
-    #     return "Simulated failure occurred!", 500
-
-    # # If healthy, mark the endpoint as healthy
-    # if is_healthy:
-    #     endpoint_status.labels(endpoint='/').set(1)  # Healthy
-
-    # Render the frontend
-    return "stable version"
+    # Render the HTML frontend
+    return render_template("index.html")
 
 
 @app.route("/deploy")
@@ -59,29 +43,28 @@ def deploy():
     """Simulate a successful deployment and calculate lead time."""
     global start_time
     if start_time is not None:
-        # Calculate lead time for changes
         lead_time = time.time() - start_time
         lead_time_for_changes.observe(lead_time)
-    # Increment deployment frequency
     deployment_frequency.inc()
-    # Update start time for the next deployment
     start_time = time.time()
     return "Deployment successful!", 200
+
+
+@app.route("/failure")
+def failure():
+    """Simulate a failed change."""
+    change_failure_rate.inc()
+    return "Change failed!", 500
 
 
 @app.route("/recover")
 def recover():
     """Simulate recovery and calculate MTTR."""
-    global failure_time, is_healthy
-    if failure_time is not None:
-        # Calculate mean time to recovery
-        recovery_time = time.time() - failure_time
+    global recovery_start_time
+    if recovery_start_time is not None:
+        recovery_time = time.time() - recovery_start_time
         mean_time_to_recovery.set(recovery_time)
-        # Reset failure time after recovery
-        failure_time = None
-    # Mark the endpoint as healthy
-    is_healthy = True
-    endpoint_status.labels(endpoint='/').set(1)  # Healthy
+    recovery_start_time = time.time()
     return "System recovered!", 200
 
 
