@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: flask-container
-        image: salmaborchani/flask-app:{{github.sha}}  # Dynamic Git SHA as tag
+        image: salmaborchani/flask-app:a8b107d50c5b17faaeb23e9cf53e1af2c943768d
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
