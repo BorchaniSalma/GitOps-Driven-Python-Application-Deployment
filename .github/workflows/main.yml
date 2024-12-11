@@ -24,11 +24,11 @@ jobs:
       # Step 3: Update Deployment in GitHub
       - name: Update Deployment Manifest
         run: |
-          sed -i "s|image: salmaborchani/flask-app:.*|image: salmaborchani/flask-app:${{ github.sha }}|g" Deployment.yaml
+          sed -i "s|image: salmaborchani/flask-app:.*|image: salmaborchani/flask-app:${{ github.sha }}|g" Deployments.yaml
           git config --global user.email "sborcheni@gmail.com"
           git config --global user.name "BorchaniSalma"
           git add Deployment.yaml
           git commit -m "Update Deployment to use image ${{ github.sha }}"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKE }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
