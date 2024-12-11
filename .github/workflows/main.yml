@@ -18,7 +18,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           docker build -t salmaborchani/flask-app:${{ github.sha }} .
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAM }} --password-stdin
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push salmaborchani/flask-app:${{ github.sha }}
 
       # Step 3: Update Deployment in GitHub
@@ -31,4 +31,4 @@ jobs:
           git commit -m "Update Deployment to use image ${{ github.sha }}"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKE }}
