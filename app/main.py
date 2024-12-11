@@ -51,7 +51,7 @@ def index():
         endpoint_status.labels(endpoint='/').set(1)  # Healthy
 
     # Render the frontend
-    return render_template("index.html")
+    return "hello"
 
 
 @app.route("/deploy")
