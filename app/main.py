@@ -34,24 +34,24 @@ is_healthy = True  # Flag to simulate the endpoint's health
 
 @app.route("/")
 def index():
-    """Main index route with simulated failure."""
-    global is_healthy, failure_time
+    # """Main index route with simulated failure."""
+    # global is_healthy, failure_time
 
-    # Simulate a failure randomly (e.g., 1 in 5 requests fail)
-    if random.randint(1, 5) == 1:
-        # Mark the endpoint as unhealthy
-        is_healthy = False
-        endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
-        change_failure_rate.inc()
-        failure_time = time.time() if failure_time is None else failure_time
-        return "Simulated failure occurred!", 500
+    # # Simulate a failure randomly (e.g., 1 in 5 requests fail)
+    # if random.randint(1, 5) == 1:
+    #     # Mark the endpoint as unhealthy
+    #     is_healthy = False
+    #     endpoint_status.labels(endpoint='/').set(0)  # Unhealthy
+    #     change_failure_rate.inc()
+    #     failure_time = time.time() if failure_time is None else failure_time
+    #     return "Simulated failure occurred!", 500
 
-    # If healthy, mark the endpoint as healthy
-    if is_healthy:
-        endpoint_status.labels(endpoint='/').set(1)  # Healthy
+    # # If healthy, mark the endpoint as healthy
+    # if is_healthy:
+    #     endpoint_status.labels(endpoint='/').set(1)  # Healthy
 
     # Render the frontend
-    return "hello"
+    return "new hello"
 
 
 @app.route("/deploy")
